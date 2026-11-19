@@ -11,8 +11,11 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.1",
+    "chart.js": "^4.6.1",
+    "chartjs-plugin-zoom": "^2.2.0",
     "lucide-react": "^1.75.0",
     "react": "^19.3.1",
+    "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.3.1",
     "recharts": "^3.11.0"
   },
