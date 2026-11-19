@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import {
-  ResponsiveContainer, ComposedChart, Line, Area,
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine
-} from 'recharts';
 import { Waves, Activity, Compass, Radio, Send, Clock, Database } from 'lucide-react';
 import harmonikData from './harmonik_surabaya.json';
+import GrafikPasut from './GrafikPasut';
 import TabelKonstanta from './TabelKonstanta';
 import './App.css';
 
@@ -123,6 +120,11 @@ export default function App() {
     return points;
   }, [obsData, nowUtc]);
 
+  const obsOnlyData = useMemo(() => obsData.map((d) => ({
+    labelWaktu: formatUTC(d.timestamp),
+    observasi: d.observasi
+  })), [obsData]);
+
   const latestObs = obsData.length > 0 ? obsData[obsData.length - 1] : null;
   const prevObs = obsData.length > 1 ? obsData[obsData.length - 2] : null;
   const trend = latestObs && prevObs
@@ -135,73 +137,50 @@ export default function App() {
     harmonikData.formzahl <= 3.0 ? 'Campuran Condong Tunggal' : 'Harian Tunggal (Diurnal)';
 
   return (
-    <div className="container">
-      <div className="header">
-        <div className="header-title">
-          <h1><Waves size={28} /> Tide Gauge Surabaya — Muara Sungai Kalimas</h1>
-          <p>Stasiun Syahbandar Tanjung Perak • Pemantauan Real-Time & Prediksi Harmonik Least Square</p>
+    <div>
+      <header className="top-bar">
+        <div className="top-bar-inner">
+          <div className="header-title">
+            <h1><Waves size={26} /> Stasiun Pasang Surut Surabaya — Muara Sungai Kalimas</h1>
+            <p>Syahbandar Tanjung Perak • Pemantauan Water Level Real-Time & Prediksi Harmonik (UTC)</p>
+          </div>
+          <div className="badge-group">
+            <span className="badge"><Database size={13} style={{ marginRight: 5, verticalAlign: 'middle' }} />{dbStatus}</span>
+            <span className="badge"><Clock size={13} style={{ marginRight: 5, verticalAlign: 'middle' }} />{new Date(nowUtc).toUTCString().replace('GMT', 'UTC')}</span>
+            <button className="btn-sim" onClick={kirimSimulasiKeSupabase} disabled={sending}>
+              <Send size={15} />{sending ? 'Mengirim...' : 'Tes Kirim Data GSM (15m)'}
+            </button>
+          </div>
         </div>
-        <div className="badge-group">
-          <span className="badge">
-            <Database size={13} style={{ marginRight: 5, verticalAlign: 'middle' }} />
-            {dbStatus}
-          </span>
-          <span className="badge">
-            <Clock size={13} style={{ marginRight: 5, verticalAlign: 'middle' }} />
-            {new Date(nowUtc).toUTCString().replace('GMT', 'UTC')}
-          </span>
-          <button className="btn-sim" onClick={kirimSimulasiKeSupabase} disabled={sending}>
-            <Send size={16} />
-            {sending ? 'Mengirim...' : 'Tes Kirim Data GSM (15m)'}
-          </button>
-        </div>
-      </div>
+      </header>
 
-      <div className="grid-cards">
-        <div className="card">
-          <div className="card-label"><Activity size={16} color="#38bdf8" /> Tinggi Muka Air Terkini</div>
-          <div className="card-value">{latestObs ? `${latestObs.observasi.toFixed(3)} m` : '--'}</div>
-          <div className="card-sub">{latestObs ? `Update: ${formatUTC(latestObs.timestamp)} UTC` : 'Klik "Tes Kirim Data GSM"'}</div>
+      <main className="container">
+        <div className="grid-cards">
+          <div className="card">
+            <div className="card-label"><Activity size={15} color="#0284c7" /> Tinggi Muka Air Terkini</div>
+            <div className="card-value">{latestObs ? `${latestObs.observasi.toFixed(3)} m` : '--'}</div>
+            <div className="card-sub">{latestObs ? `Update: ${formatUTC(latestObs.timestamp)} UTC` : 'Klik "Tes Kirim Data GSM"'}</div>
+          </div>
+          <div className="card">
+            <div className="card-label"><Radio size={15} color="#059669" /> Status Pergerakan Air</div>
+            <div className="card-value" style={{ fontSize: '1.4rem', marginTop: 4 }}>{trend}</div>
+            <div className="card-sub">Interval Sensor JSN-SR04T: 15 Menit</div>
+          </div>
+          <div className="card">
+            <div className="card-label"><Waves size={15} color="#d97706" /> Duduk Tengah (Z₀ / MSL)</div>
+            <div className="card-value">{harmonikData.Z0.toFixed(3)} m</div>
+            <div className="card-sub">Referensi Model Harmonik Surabaya</div>
+          </div>
+          <div className="card">
+            <div className="card-label"><Compass size={15} color="#7c3aed" /> Bilangan Formzahl (F)</div>
+            <div className="card-value">{harmonikData.formzahl.toFixed(3)}</div>
+            <div className="card-sub">{tipePasut}</div>
+          </div>
         </div>
-        <div className="card">
-          <div className="card-label"><Radio size={16} color="#34d399" /> Status Pergerakan Air</div>
-          <div className="card-value" style={{ fontSize: '1.45rem', marginTop: 4 }}>{trend}</div>
-          <div className="card-sub">Interval Sensor JSN-SR04T: 15 Menit</div>
-        </div>
-        <div className="card">
-          <div className="card-label"><Waves size={16} color="#fbbf24" /> Duduk Tengah (Z₀ / MSL)</div>
-          <div className="card-value">{harmonikData.Z0.toFixed(3)} m</div>
-          <div className="card-sub">Referensi Model Harmonik IOC Surabaya</div>
-        </div>
-        <div className="card">
-          <div className="card-label"><Compass size={16} color="#a78bfa" /> Bilangan Formzahl (F)</div>
-          <div className="card-value">{harmonikData.formzahl.toFixed(3)}</div>
-          <div className="card-sub">{tipePasut}</div>
-        </div>
-      </div>
 
-      <div className="chart-box">
-        <div className="chart-header">
-          <h2>Grafik Tinggi Muka Air: Observasi Real-Time vs Prediksi Harmonik (UTC)</h2>
-          <span style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Resolusi: 15 Menit • Harmonic Least Square</span>
-        </div>
-        <div style={{ width: '100%', height: 380 }}>
-          <ResponsiveContainer>
-            <ComposedChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-              <XAxis dataKey="labelWaktu" stroke="#94a3b8" tick={{ fontSize: 11 }} minTickGap={35} />
-              <YAxis stroke="#94a3b8" tick={{ fontSize: 12 }} domain={['auto', 'auto']} unit=" m" />
-              <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#38bdf8', borderRadius: 8 }} />
-              <Legend verticalAlign="top" height={36} />
-              <ReferenceLine y={harmonikData.Z0} stroke="#fbbf24" strokeDasharray="4 4" />
-              <Area type="monotone" dataKey="prediksi" name="Prediksi Harmonik (Least Square)" stroke="#38bdf8" strokeWidth={2} strokeDasharray="5 5" fill="#38bdf8" fillOpacity={0.12} dot={false} />
-              <Line type="monotone" dataKey="observasi" name="Observasi Sensor JSN-SR04T (m)" stroke="#34d399" strokeWidth={3} dot={{ r: 4, fill: '#34d399' }} connectNulls={true} />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      <TabelKonstanta data={harmonikData.constituents} />
+        <GrafikPasut chartData={chartData} obsOnlyData={obsOnlyData} z0={harmonikData.Z0} />
+        <TabelKonstanta data={harmonikData.constituents} />
+      </main>
     </div>
   );
 }

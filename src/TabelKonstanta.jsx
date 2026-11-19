@@ -3,7 +3,7 @@ import React from 'react';
 export default function TabelKonstanta({ data }) {
   return (
     <div className="table-box">
-      <h2 style={{ fontSize: '1.1rem', color: '#e2e8f0' }}>
+      <h2 style={{ fontSize: '1.05rem', color: '#0f172a' }}>
         Konstanta Harmonik Pasang Surut Surabaya (Least Square)
       </h2>
       <table>
@@ -20,11 +20,11 @@ export default function TabelKonstanta({ data }) {
         <tbody>
           {data.map((item) => (
             <tr key={item.name}>
-              <td style={{ fontWeight: 'bold', color: '#38bdf8' }}>{item.name}</td>
+              <td style={{ fontWeight: 'bold', color: '#0284c7' }}>{item.name}</td>
               <td>{item.omega_deg_per_hour.toFixed(6)}</td>
               <td>{item.A.toFixed(4)}</td>
               <td>{item.B.toFixed(4)}</td>
-              <td style={{ fontWeight: 'bold', color: '#34d399' }}>{item.H.toFixed(4)}</td>
+              <td style={{ fontWeight: 'bold', color: '#059669' }}>{item.H.toFixed(4)}</td>
               <td>{item.g.toFixed(2)} deg</td>
             </tr>
           ))}

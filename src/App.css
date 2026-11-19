@@ -6,41 +6,39 @@
 }
 
 body {
-  background-color: #0f172a;
-  color: #f8fafc;
+  background-color: #f1f5f9;
+  color: #1e293b;
 }
 
-.container {
+.top-bar {
+  background: linear-gradient(90deg, #0369a1 0%, #0284c7 100%);
+  color: #ffffff;
+  padding: 18px 24px;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.2);
+}
+
+.top-bar-inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px 16px;
-}
-
-.header {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  border: 1px solid #334155;
-  padding: 20px 24px;
-  border-radius: 14px;
-  margin-bottom: 20px;
+  gap: 14px;
 }
 
 .header-title h1 {
-  font-size: 1.45rem;
-  color: #38bdf8;
+  font-size: 1.35rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
 .header-title p {
-  font-size: 0.9rem;
-  color: #94a3b8;
-  margin-top: 4px;
+  font-size: 0.85rem;
+  color: #e0f2fe;
+  margin-top: 3px;
 }
 
 .badge-group {
@@ -51,35 +49,38 @@ body {
 }
 
 .badge {
-  background: #1e293b;
-  border: 1px solid #38bdf8;
-  color: #38bdf8;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
   padding: 6px 12px;
   border-radius: 20px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
 }
 
 .btn-sim {
-  background: #0284c7;
-  color: white;
+  background: #ffffff;
+  color: #0369a1;
   border: none;
-  padding: 9px 16px;
+  padding: 8px 15px;
   border-radius: 8px;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 0.82rem;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  transition: background 0.2s;
+  gap: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-sim:hover {
-  background: #0369a1;
+  background: #e0f2fe;
 }
 
-.btn-sim.active {
-  background: #dc2626;
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
 }
 
 .grid-cards {
@@ -90,15 +91,18 @@ body {
 }
 
 .card {
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 18px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .card-label {
-  font-size: 0.82rem;
-  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -106,65 +110,77 @@ body {
 }
 
 .card-value {
-  font-size: 1.75rem;
+  font-size: 1.7rem;
   font-weight: 700;
-  color: #f8fafc;
+  color: #0f172a;
 }
 
 .card-sub {
   font-size: 0.8rem;
-  color: #38bdf8;
+  color: #0284c7;
   margin-top: 4px;
 }
 
 .chart-box {
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .chart-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f1f5f9;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
 .chart-header h2 {
-  font-size: 1.1rem;
-  color: #e2e8f0;
+  font-size: 1.05rem;
+  color: #0f172a;
+}
+
+.grid-two-charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(460px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
 }
 
 .table-box {
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 20px;
   overflow-x: auto;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 12px;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
 th, td {
   padding: 10px 14px;
   text-align: left;
-  border-bottom: 1px solid #334155;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 th {
-  color: #94a3b8;
-  font-weight: 600;
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 700;
 }
 
 tr:hover {
-  background: #273549;
+  background-color: #f8fafc;
 }
