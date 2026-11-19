@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Waves, Activity, Compass, Radio, Send, Clock, Database } from 'lucide-react';
 import harmonikData from './harmonik_surabaya.json';
+import BannerPeringatan from './BannerPeringatan';
 import GrafikPasut from './GrafikPasut';
 import TabelKonstanta from './TabelKonstanta';
 import './App.css';
@@ -32,6 +33,8 @@ export default function App() {
   const [obsData, setObsData] = useState([]);
   const [dbStatus, setDbStatus] = useState('Menghubungkan Supabase...');
   const [sending, setSending] = useState(false);
+  const [batasSiaga, setBatasSiaga] = useState(2.5);
+  const [batasBahaya, setBatasBahaya] = useState(3.2);
 
   useEffect(() => {
     const timer = setInterval(() => setNowUtc(Date.now()), 1000);
@@ -155,6 +158,14 @@ export default function App() {
       </header>
 
       <main className="container">
+        <BannerPeringatan
+          tinggiAir={latestObs ? latestObs.observasi : null}
+          batasSiaga={batasSiaga}
+          batasBahaya={batasBahaya}
+          setBatasSiaga={setBatasSiaga}
+          setBatasBahaya={setBatasBahaya}
+        />
+
         <div className="grid-cards">
           <div className="card">
             <div className="card-label"><Activity size={15} color="#0284c7" /> Tinggi Muka Air Terkini</div>
@@ -178,7 +189,7 @@ export default function App() {
           </div>
         </div>
 
-        <GrafikPasut chartData={chartData} obsOnlyData={obsOnlyData} z0={harmonikData.Z0} />
+        <GrafikPasut chartData={chartData} obsOnlyData={obsOnlyData} z0={harmonikData.Z0} batasBahaya={batasBahaya} />
         <TabelKonstanta data={harmonikData.constituents} />
       </main>
     </div>
