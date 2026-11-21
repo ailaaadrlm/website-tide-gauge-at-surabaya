@@ -26,7 +26,7 @@ const baseZoomOptions = {
     }
   },
   scales: {
-    x: { ticks: { maxTicksLimit: 10, font: { size: 11 } }, grid: { color: '#f1f5f9' } },
+    x: { ticks: { maxTicksLimit: 12, font: { size: 11 } }, grid: { color: '#f1f5f9' } },
     y: { ticks: { callback: (v) => `${v} m`, font: { size: 11 } }, grid: { color: '#e2e8f0' } }
   }
 };
@@ -114,38 +114,45 @@ export default function GrafikPasut({ chartData, obsOnlyData, z0, batasBahaya })
 
   return (
     <>
+      {/* 1. Grafik Gabungan */}
       <div className="chart-box">
         <div className="chart-header">
-          <h2>1. Perbandingan Tinggi Muka Air: Observasi vs Prediksi (UTC)</h2>
+          <h2>1. Perbandingan Tinggi Muka Air: Observasi Real-Time vs Prediksi (UTC)</h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Pinch / Scroll untuk Zoom • Geser untuk Pan</span>
             <button style={btnResetStyle} onClick={() => chart1Ref.current?.resetZoom()}>Reset Zoom</button>
           </div>
         </div>
-        <div style={{ width: '100%', height: 330 }}>
+        <div style={{ width: '100%', height: 320 }}>
           <Line ref={chart1Ref} data={dataGabungan} options={baseZoomOptions} />
         </div>
       </div>
 
-      <div className="grid-two-charts">
-        <div className="chart-box" style={{ marginBottom: 0 }}>
-          <div className="chart-header">
-            <h2>2. Grafik Observasi Real-Time (Sensor JSN-SR04T)</h2>
+      {/* 2. Grafik Real-Time Sendiri (Lebar Penuh) */}
+      <div className="chart-box">
+        <div className="chart-header">
+          <h2>2. Grafik Observasi Real-Time — Sensor JSN-SR04T (UTC)</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 600 }}>Data Aktual Lapangan</span>
             <button style={btnResetStyle} onClick={() => chart2Ref.current?.resetZoom()}>Reset Zoom</button>
           </div>
-          <div style={{ width: '100%', height: 270 }}>
-            <Line ref={chart2Ref} data={dataObs} options={baseZoomOptions} />
-          </div>
         </div>
+        <div style={{ width: '100%', height: 320 }}>
+          <Line ref={chart2Ref} data={dataObs} options={baseZoomOptions} />
+        </div>
+      </div>
 
-        <div className="chart-box" style={{ marginBottom: 0 }}>
-          <div className="chart-header">
-            <h2>3. Grafik Prakiraan / Prediksi Pasang Surut</h2>
+      {/* 3. Grafik Prediksi Sendiri (Lebar Penuh) */}
+      <div className="chart-box">
+        <div className="chart-header">
+          <h2>3. Grafik Prakiraan / Prediksi Pasang Surut Harmonik (UTC)</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: '0.78rem', color: '#0284c7', fontWeight: 600 }}>Model Least Square Surabaya</span>
             <button style={btnResetStyle} onClick={() => chart3Ref.current?.resetZoom()}>Reset Zoom</button>
           </div>
-          <div style={{ width: '100%', height: 270 }}>
-            <Line ref={chart3Ref} data={dataPrediksi} options={baseZoomOptions} />
-          </div>
+        </div>
+        <div style={{ width: '100%', height: 320 }}>
+          <Line ref={chart3Ref} data={dataPrediksi} options={baseZoomOptions} />
         </div>
       </div>
     </>
