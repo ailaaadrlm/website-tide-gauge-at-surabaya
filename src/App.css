@@ -19,7 +19,7 @@ body {
 
 .top-bar-inner {
   width: 100%;
-  max-width: 98%;
+  max-width: 100%;
   margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
@@ -80,7 +80,7 @@ body {
 
 .container {
   width: 100%;
-  max-width: 98%;
+  max-width: 100%;
   margin: 0 auto;
   padding: 20px 12px 40px;
 }
