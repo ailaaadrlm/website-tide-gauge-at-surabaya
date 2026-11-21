@@ -25,7 +25,7 @@ function hitungPrediksiHarmonik(targetTimeMs, model) {
 function formatUTC(ms) {
   const d = new Date(ms);
   const pad = (n) => String(n).padStart(2, '0');
-  return `${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+  return `${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)} ${pad(d.getUTCHours())}:00`;
 }
 
 export default function App() {
@@ -52,7 +52,7 @@ export default function App() {
         .from('data_pasut')
         .select('*')
         .order('waktu_utc', { ascending: true })
-        .limit(100);
+        .limit(168); // 7 hari data per jam (7 x 24 = 168)
 
       if (error) {
         setDbStatus(`Error DB: ${error.message}`);
@@ -72,7 +72,7 @@ export default function App() {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'data_pasut' }, (payload) => {
         const newRow = payload.new;
         setObsData((prev) => [
-          ...prev.slice(-99),
+          ...prev.slice(-167),
           { timestamp: new Date(newRow.waktu_utc).getTime(), observasi: Number(newRow.tinggi_air) }
         ]);
       })
@@ -85,9 +85,9 @@ export default function App() {
     if (!supabase || sending) return;
     setSending(true);
     try {
-      const slot15m = Math.floor(Date.now() / (15 * 60 * 1000)) * (15 * 60 * 1000);
-      const lastTime = obsData.length > 0 ? obsData[obsData.length - 1].timestamp : slot15m - 15 * 60 * 1000;
-      const targetTime = lastTime >= slot15m ? lastTime + 15 * 60 * 1000 : slot15m;
+      const slot1Jam = Math.floor(Date.now() / (60 * 60 * 1000)) * (60 * 60 * 1000);
+      const lastTime = obsData.length > 0 ? obsData[obsData.length - 1].timestamp : slot1Jam - 60 * 60 * 1000;
+      const targetTime = lastTime >= slot1Jam ? lastTime + 60 * 60 * 1000 : slot1Jam;
       const pred = hitungPrediksiHarmonik(targetTime, harmonikData);
       const nilaiSensor = Number((pred + (Math.random() - 0.5) * 0.06).toFixed(3));
 
@@ -101,11 +101,12 @@ export default function App() {
     }
   }
 
+  // Resolusi grafik 1 jam (24 jam ke belakang s/d 48 jam ke depan)
   const chartData = useMemo(() => {
-    const anchor = obsData.length > 0 ? obsData[obsData.length - 1].timestamp : Math.floor(nowUtc / (15 * 60 * 1000)) * (15 * 60 * 1000);
-    const startMs = anchor - 12 * 3600 * 1000;
-    const endMs = anchor + 36 * 3600 * 1000;
-    const stepMs = 15 * 60 * 1000;
+    const stepMs = 60 * 60 * 1000;
+    const anchor = obsData.length > 0 ? obsData[obsData.length - 1].timestamp : Math.floor(nowUtc / stepMs) * stepMs;
+    const startMs = anchor - 24 * stepMs;
+    const endMs = anchor + 48 * stepMs;
 
     const obsMap = new Map();
     for (const d of obsData) {
@@ -151,7 +152,7 @@ export default function App() {
             <span className="badge"><Database size={13} style={{ marginRight: 5, verticalAlign: 'middle' }} />{dbStatus}</span>
             <span className="badge"><Clock size={13} style={{ marginRight: 5, verticalAlign: 'middle' }} />{new Date(nowUtc).toUTCString().replace('GMT', 'UTC')}</span>
             <button className="btn-sim" onClick={kirimSimulasiKeSupabase} disabled={sending}>
-              <Send size={15} />{sending ? 'Mengirim...' : 'Tes Kirim Data GSM (15m)'}
+              <Send size={15} />{sending ? 'Mengirim...' : 'Tes Kirim Data GSM (1 Jam)'}
             </button>
           </div>
         </div>
@@ -175,7 +176,7 @@ export default function App() {
           <div className="card">
             <div className="card-label"><Radio size={15} color="#059669" /> Status Pergerakan Air</div>
             <div className="card-value" style={{ fontSize: '1.4rem', marginTop: 4 }}>{trend}</div>
-            <div className="card-sub">Interval Sensor JSN-SR04T: 15 Menit</div>
+            <div className="card-sub">Interval Sensor JSN-SR04T: 1 Jam</div>
           </div>
           <div className="card">
             <div className="card-label"><Waves size={15} color="#d97706" /> Duduk Tengah (Z₀ / MSL)</div>
