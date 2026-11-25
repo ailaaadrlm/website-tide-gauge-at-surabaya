@@ -63,8 +63,7 @@ export default function GrafikPasut({ chartData, obsOnlyData, z0, batasBahaya })
   const chart3Ref = useRef(null);
 
   const labelsAll = chartData.map((d) => d.labelWaktu);
-  const garisPutus =;
-
+  const garisPutus = new Array(6, 4);
   const dataGabungan = {
     labels: labelsAll,
     datasets: [
