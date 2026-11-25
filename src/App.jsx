@@ -4,6 +4,7 @@ import { Waves, Activity, Compass, Radio, Send, Clock, Database } from 'lucide-r
 import harmonikData from './harmonik_surabaya.json';
 import BannerPeringatan from './BannerPeringatan';
 import GrafikPasut from './GrafikPasut';
+import TabelHistori from './TabelHistori';
 import TabelKonstanta from './TabelKonstanta';
 import './App.css';
 
@@ -25,7 +26,7 @@ function hitungPrediksiHarmonik(targetTimeMs, model) {
 function formatUTC(ms) {
   const d = new Date(ms);
   const pad = (n) => String(n).padStart(2, '0');
-  return `${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)} ${pad(d.getUTCHours())}:00`;
+  return `${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
 }
 
 export default function App() {
@@ -52,16 +53,22 @@ export default function App() {
         .from('data_pasut')
         .select('*')
         .order('waktu_utc', { ascending: true })
-        .limit(168); // 7 hari data per jam (7 x 24 = 168)
+        .limit(1000); // ~7 hari data per 10 menit (7 x 144 = 1008)
 
       if (error) {
         setDbStatus(`Error DB: ${error.message}`);
       } else {
         setDbStatus('Supabase Realtime Aktif');
-        setObsData(data.map((row) => ({
-          timestamp: new Date(row.waktu_utc).getTime(),
-          observasi: Number(row.tinggi_air)
-        })));
+        setObsData(data.map((row) => {
+          const ts = new Date(row.waktu_utc).getTime();
+          return {
+            timestamp: ts,
+            waktu_utc: row.waktu_utc,
+            observasi: Number(row.tinggi_air),
+            prediksi: hitungPrediksiHarmonik(ts, harmonikData),
+            sumber: row.sumber || 'sensor_kalimas'
+          };
+        }));
       }
     }
 
@@ -71,9 +78,16 @@ export default function App() {
       .channel('pasut-kalimas-live')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'data_pasut' }, (payload) => {
         const newRow = payload.new;
+        const ts = new Date(newRow.waktu_utc).getTime();
         setObsData((prev) => [
-          ...prev.slice(-167),
-          { timestamp: new Date(newRow.waktu_utc).getTime(), observasi: Number(newRow.tinggi_air) }
+          ...prev.slice(-999),
+          {
+            timestamp: ts,
+            waktu_utc: newRow.waktu_utc,
+            observasi: Number(newRow.tinggi_air),
+            prediksi: hitungPrediksiHarmonik(ts, harmonikData),
+            sumber: newRow.sumber || 'sensor_kalimas'
+          }
         ]);
       })
       .subscribe();
@@ -85,9 +99,10 @@ export default function App() {
     if (!supabase || sending) return;
     setSending(true);
     try {
-      const slot1Jam = Math.floor(Date.now() / (60 * 60 * 1000)) * (60 * 60 * 1000);
-      const lastTime = obsData.length > 0 ? obsData[obsData.length - 1].timestamp : slot1Jam - 60 * 60 * 1000;
-      const targetTime = lastTime >= slot1Jam ? lastTime + 60 * 60 * 1000 : slot1Jam;
+      const stepMs = 10 * 60 * 1000;
+      const slot10m = Math.floor(Date.now() / stepMs) * stepMs;
+      const lastTime = obsData.length > 0 ? obsData[obsData.length - 1].timestamp : slot10m - stepMs;
+      const targetTime = lastTime >= slot10m ? lastTime + stepMs : slot10m;
       const pred = hitungPrediksiHarmonik(targetTime, harmonikData);
       const nilaiSensor = Number((pred + (Math.random() - 0.5) * 0.06).toFixed(3));
 
@@ -101,12 +116,12 @@ export default function App() {
     }
   }
 
-  // Resolusi grafik 1 jam (24 jam ke belakang s/d 48 jam ke depan)
+  // Resolusi grafik 10 menit (12 jam ke belakang s/d 36 jam ke depan)
   const chartData = useMemo(() => {
-    const stepMs = 60 * 60 * 1000;
+    const stepMs = 10 * 60 * 1000;
     const anchor = obsData.length > 0 ? obsData[obsData.length - 1].timestamp : Math.floor(nowUtc / stepMs) * stepMs;
-    const startMs = anchor - 24 * stepMs;
-    const endMs = anchor + 48 * stepMs;
+    const startMs = anchor - 12 * 3600 * 1000;
+    const endMs = anchor + 36 * 3600 * 1000;
 
     const obsMap = new Map();
     for (const d of obsData) {
@@ -152,7 +167,7 @@ export default function App() {
             <span className="badge"><Database size={13} style={{ marginRight: 5, verticalAlign: 'middle' }} />{dbStatus}</span>
             <span className="badge"><Clock size={13} style={{ marginRight: 5, verticalAlign: 'middle' }} />{new Date(nowUtc).toUTCString().replace('GMT', 'UTC')}</span>
             <button className="btn-sim" onClick={kirimSimulasiKeSupabase} disabled={sending}>
-              <Send size={15} />{sending ? 'Mengirim...' : 'Tes Kirim Data GSM (1 Jam)'}
+              <Send size={15} />{sending ? 'Mengirim...' : 'Tes Kirim Data GSM (10m)'}
             </button>
           </div>
         </div>
@@ -176,7 +191,7 @@ export default function App() {
           <div className="card">
             <div className="card-label"><Radio size={15} color="#059669" /> Status Pergerakan Air</div>
             <div className="card-value" style={{ fontSize: '1.4rem', marginTop: 4 }}>{trend}</div>
-            <div className="card-sub">Interval Sensor JSN-SR04T: 1 Jam</div>
+            <div className="card-sub">Interval Sensor JSN-SR04T: 10 Menit</div>
           </div>
           <div className="card">
             <div className="card-label"><Waves size={15} color="#d97706" /> Duduk Tengah (Z₀ / MSL)</div>
@@ -191,6 +206,7 @@ export default function App() {
         </div>
 
         <GrafikPasut chartData={chartData} obsOnlyData={obsOnlyData} z0={harmonikData.Z0} batasBahaya={batasBahaya} />
+        <TabelHistori data={obsData} />
         <TabelKonstanta data={harmonikData.constituents} />
       </main>
     </div>
