@@ -41,6 +41,7 @@ const baseZoomOptions = {
       grid: { color: '#e2e8f0' }
     }
   }
+};
 
 export default function GrafikPasut({ chartData, obsOnlyData, z0, batasBahaya }) {
   const chart1Ref = useRef(null);
