@@ -117,11 +117,13 @@ export default function App() {
   }
 
   // Resolusi grafik 10 menit (12 jam ke belakang s/d 36 jam ke depan)
-  const chartData = useMemo(() => {
+    const chartData = useMemo(() => {
     const stepMs = 10 * 60 * 1000;
-    const anchor = obsData.length > 0 ? obsData[obsData.length - 1].timestamp : Math.floor(nowUtc / stepMs) * stepMs;
-    const startMs = anchor - 12 * 3600 * 1000;
-    const endMs = anchor + 36 * 3600 * 1000;
+    const hourMs = 60 * 60 * 1000;
+    const rawAnchor = obsData.length > 0 ? obsData[obsData.length - 1].timestamp : nowUtc;
+    const anchor = Math.floor(rawAnchor / hourMs) * hourMs;
+    const startMs = anchor - 12 * hourMs;
+    const endMs = anchor + 36 * hourMs;
 
     const obsMap = new Map();
     for (const d of obsData) {
