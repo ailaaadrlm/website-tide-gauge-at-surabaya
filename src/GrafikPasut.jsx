@@ -38,13 +38,17 @@ const baseZoomOptions = {
         font: { size: 11 },
         callback: function(val) {
           const label = this.getLabelForValue(val);
-          if (!label) return null;
-          // Tampilkan label pada kelipatan 3 jam agar rapi seperti BIG dan tidak bertumpuk
+          if (!label) return '';
           const jamBulat = ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'];
-          return jamBulat.some((j) => label.endsWith(j)) ? label : null;
+          return jamBulat.some((j) => label.endsWith(j)) ? label : '';
         }
       },
-      grid: { color: '#f1f5f9' }
+      grid: {
+        color: (ctx) => {
+          const label = ctx.tick && ctx.tick.label;
+          return label ? '#cbd5e1' : 'transparent';
+        }
+      }
     },
     y: {
       ticks: { callback: (v) => `${v} m`, font: { size: 11 } },
@@ -53,14 +57,13 @@ const baseZoomOptions = {
   }
 };
 
-
 export default function GrafikPasut({ chartData, obsOnlyData, z0, batasBahaya }) {
   const chart1Ref = useRef(null);
   const chart2Ref = useRef(null);
   const chart3Ref = useRef(null);
 
   const labelsAll = chartData.map((d) => d.labelWaktu);
-  const garisPutus = new Array(6, 4);
+  const garisPutus =;
 
   const dataGabungan = {
     labels: labelsAll,
@@ -70,8 +73,8 @@ export default function GrafikPasut({ chartData, obsOnlyData, z0, batasBahaya })
         data: chartData.map((d) => d.observasi),
         borderColor: '#059669',
         backgroundColor: '#059669',
-        borderWidth: 2,
-        pointRadius: 2.5,
+        borderWidth: 2.5,
+        pointRadius: 3.5,
         spanGaps: true,
         tension: 0
       },
