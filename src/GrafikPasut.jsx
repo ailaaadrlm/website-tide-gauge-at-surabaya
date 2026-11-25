@@ -16,11 +16,15 @@ const baseZoomOptions = {
   maintainAspectRatio: false,
   interaction: { mode: 'index', intersect: false },
   plugins: {
-    tooltip: {
+        tooltip: {
       callbacks: {
-        title: (items) => (items.length > 0 ? `${items[0].label} UTC` : '')
+        title: (items) => {
+          const first = items.at(0);
+          return first ? `Waktu: ${first.label} UTC` : '';
+        }
       }
     },
+
     zoom: {
       pan: { enabled: true, mode: 'x' },
       zoom: {
