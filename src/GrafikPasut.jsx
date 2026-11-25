@@ -16,6 +16,12 @@ const baseZoomOptions = {
   maintainAspectRatio: false,
   interaction: { mode: 'index', intersect: false },
   plugins: {
+    tooltip: {
+      callbacks: {
+        // Saat kursor digeser / jari disentuh di atas grafik, tampilkan waktu lengkap per 10 menit
+        title: (items) => (items.length > 0 ? `${items.label} UTC` : '')
+      }
+    },
     zoom: {
       pan: { enabled: true, mode: 'x' },
       zoom: {
@@ -30,9 +36,13 @@ const baseZoomOptions = {
       ticks: {
         maxRotation: 0,
         autoSkip: true,
-        autoSkipPadding: 28,
-        maxTicksLimit: 10,
-        font: { size: 11 }
+        autoSkipPadding: 24,
+        font: { size: 11 },
+        // Paksa sumbu X di bawah hanya menampilkan teks pada menit :00 (per 1 jam)
+        callback: function(val) {
+          const label = this.getLabelForValue(val);
+          return label && label.endsWith(':00') ? label : null;
+        }
       },
       grid: { color: '#f1f5f9' }
     },
