@@ -26,8 +26,29 @@ const baseZoomOptions = {
     }
   },
   scales: {
-    x: { ticks: { maxTicksLimit: 12, font: { size: 11 } }, grid: { color: '#f1f5f9' } },
-    y: { ticks: { callback: (v) => `${v} m`, font: { size: 11 } }, grid: { color: '#e2e8f0' } }
+    x: {
+      ticks: {
+        maxRotation: 0,
+        autoSkip: false,
+        font: { size: 11 },
+        // Hanya tampilkan tulisan jam di sumbu X pada kelipatan jam (:00) seperti portal BIG
+        callback: function(val) {
+          const label = this.getLabelForValue(val);
+          if (!label) return '';
+          if (label.endsWith('00:00') || label.endsWith('03:00') || label.endsWith('06:00') ||
+              label.endsWith('09:00') || label.endsWith('12:00') || label.endsWith('15:00') ||
+              label.endsWith('18:00') || label.endsWith('21:00')) {
+            return label;
+          }
+          return '';
+        }
+      },
+      grid: { color: '#f1f5f9' }
+    },
+    y: {
+      ticks: { callback: (v) => `${v} m`, font: { size: 11 } },
+      grid: { color: '#e2e8f0' }
+    }
   }
 };
 
@@ -47,10 +68,10 @@ export default function GrafikPasut({ chartData, obsOnlyData, z0, batasBahaya })
         data: chartData.map((d) => d.observasi),
         borderColor: '#059669',
         backgroundColor: '#059669',
-        borderWidth: 2.5,
-        pointRadius: 3.5,
+        borderWidth: 2,
+        pointRadius: 2.5,
         spanGaps: true,
-        tension: 0.25
+        tension: 0
       },
       {
         label: 'Prediksi Harmonik (m)',
@@ -58,7 +79,7 @@ export default function GrafikPasut({ chartData, obsOnlyData, z0, batasBahaya })
         borderColor: '#f97316',
         borderWidth: 2,
         pointRadius: 0,
-        tension: 0.35
+        tension: 0.2
       },
       {
         label: `MSL / Z0 (${z0.toFixed(2)} m)`,
@@ -87,9 +108,9 @@ export default function GrafikPasut({ chartData, obsOnlyData, z0, batasBahaya })
       borderColor: '#059669',
       backgroundColor: 'rgba(5, 150, 105, 0.12)',
       fill: true,
-      borderWidth: 2.5,
-      pointRadius: 4,
-      tension: 0.25
+      borderWidth: 2,
+      pointRadius: 3,
+      tension: 0
     }]
   };
 
@@ -101,9 +122,9 @@ export default function GrafikPasut({ chartData, obsOnlyData, z0, batasBahaya })
       borderColor: '#0284c7',
       backgroundColor: 'rgba(2, 132, 199, 0.18)',
       fill: true,
-      borderWidth: 2.5,
+      borderWidth: 2,
       pointRadius: 0,
-      tension: 0.35
+      tension: 0.2
     }]
   };
 
@@ -114,12 +135,11 @@ export default function GrafikPasut({ chartData, obsOnlyData, z0, batasBahaya })
 
   return (
     <>
-      {/* 1. Grafik Gabungan */}
       <div className="chart-box">
         <div className="chart-header">
           <h2>1. Perbandingan Tinggi Muka Air: Observasi Real-Time vs Prediksi (UTC)</h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Pinch / Scroll untuk Zoom • Geser untuk Pan</span>
+            <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Resolusi Data: 10 Menit • Pinch / Scroll untuk Zoom</span>
             <button style={btnResetStyle} onClick={() => chart1Ref.current?.resetZoom()}>Reset Zoom</button>
           </div>
         </div>
@@ -128,12 +148,11 @@ export default function GrafikPasut({ chartData, obsOnlyData, z0, batasBahaya })
         </div>
       </div>
 
-      {/* 2. Grafik Real-Time Sendiri (Lebar Penuh) */}
       <div className="chart-box">
         <div className="chart-header">
           <h2>2. Grafik Observasi Real-Time — Sensor JSN-SR04T (UTC)</h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 600 }}>Data Aktual Lapangan</span>
+            <span style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 600 }}>Rata-Rata per 10 Menit</span>
             <button style={btnResetStyle} onClick={() => chart2Ref.current?.resetZoom()}>Reset Zoom</button>
           </div>
         </div>
@@ -142,7 +161,6 @@ export default function GrafikPasut({ chartData, obsOnlyData, z0, batasBahaya })
         </div>
       </div>
 
-      {/* 3. Grafik Prediksi Sendiri (Lebar Penuh) */}
       <div className="chart-box">
         <div className="chart-header">
           <h2>3. Grafik Prakiraan / Prediksi Pasang Surut Harmonik (UTC)</h2>
