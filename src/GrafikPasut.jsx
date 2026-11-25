@@ -18,8 +18,7 @@ const baseZoomOptions = {
   plugins: {
     tooltip: {
       callbacks: {
-        // Saat kursor digeser / jari disentuh di atas grafik, tampilkan waktu lengkap per 10 menit
-        title: (items) => (items.length > 0 ? `${items.label} UTC` : '')
+        title: (items) => (items.length > 0 ? `${items[0].label} UTC` : '')
       }
     },
     zoom: {
@@ -35,13 +34,14 @@ const baseZoomOptions = {
     x: {
       ticks: {
         maxRotation: 0,
-        autoSkip: true,
-        autoSkipPadding: 24,
+        autoSkip: false,
         font: { size: 11 },
-        // Paksa sumbu X di bawah hanya menampilkan teks pada menit :00 (per 1 jam)
         callback: function(val) {
           const label = this.getLabelForValue(val);
-          return label && label.endsWith(':00') ? label : null;
+          if (!label) return null;
+          // Tampilkan label pada kelipatan 3 jam agar rapi seperti BIG dan tidak bertumpuk
+          const jamBulat = ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'];
+          return jamBulat.some((j) => label.endsWith(j)) ? label : null;
         }
       },
       grid: { color: '#f1f5f9' }
@@ -52,6 +52,7 @@ const baseZoomOptions = {
     }
   }
 };
+
 
 export default function GrafikPasut({ chartData, obsOnlyData, z0, batasBahaya }) {
   const chart1Ref = useRef(null);
