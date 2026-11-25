@@ -29,19 +29,10 @@ const baseZoomOptions = {
     x: {
       ticks: {
         maxRotation: 0,
-        autoSkip: false,
-        font: { size: 11 },
-        // Hanya tampilkan tulisan jam di sumbu X pada kelipatan jam (:00) seperti portal BIG
-        callback: function(val) {
-          const label = this.getLabelForValue(val);
-          if (!label) return '';
-          if (label.endsWith('00:00') || label.endsWith('03:00') || label.endsWith('06:00') ||
-              label.endsWith('09:00') || label.endsWith('12:00') || label.endsWith('15:00') ||
-              label.endsWith('18:00') || label.endsWith('21:00')) {
-            return label;
-          }
-          return '';
-        }
+        autoSkip: true,
+        autoSkipPadding: 28,
+        maxTicksLimit: 10,
+        font: { size: 11 }
       },
       grid: { color: '#f1f5f9' }
     },
@@ -50,7 +41,6 @@ const baseZoomOptions = {
       grid: { color: '#e2e8f0' }
     }
   }
-};
 
 export default function GrafikPasut({ chartData, obsOnlyData, z0, batasBahaya }) {
   const chart1Ref = useRef(null);
