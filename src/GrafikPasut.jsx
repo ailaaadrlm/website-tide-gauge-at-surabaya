@@ -16,7 +16,11 @@ const baseZoomOptions = {
   maintainAspectRatio: false,
   interaction: { mode: 'index', intersect: false },
   plugins: {
-    tooltip: {
+        tooltip: {
+      titleFont: { size: 15, weight: 'bold' },
+      bodyFont: { size: 14 },
+      padding: 12,
+      boxPadding: 6,
       callbacks: {
         title: (items) => {
           const first = items.at(0);
@@ -59,14 +63,15 @@ export default function GrafikPasut({ obsOnlyData, batasSiaga, batasBahaya }) {
   const dataObs = {
     labels,
     datasets: [
-      {
+            {
         label: 'Tinggi Muka Air Real-Time JSN-SR04T (m)',
         data: obsOnlyData.map((d) => d.observasi),
         borderColor: '#0284c7',
         backgroundColor: 'rgba(2, 132, 199, 0.15)',
         fill: true,
         borderWidth: 2.5,
-        pointRadius: 3.5,
+        pointRadius: 0,
+        pointHoverRadius: 4,
         pointBackgroundColor: '#0284c7',
         tension: 0
       },
