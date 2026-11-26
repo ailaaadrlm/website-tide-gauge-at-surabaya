@@ -3,13 +3,14 @@ export default async function handler(req, res) {
   let sumberData = "kalimas_sim800l";
 
   if (req.method === "POST" && req.body) {
-    const { elevasi, tinggi, sumber } = req.body;
-    if (elevasi !== undefined && !isNaN(parseFloat(elevasi))) {
-      tinggiMeter = Number((parseFloat(elevasi) / 100.0).toFixed(4));
-    } else if (tinggi !== undefined && !isNaN(parseFloat(tinggi))) {
-      tinggiMeter = parseFloat(tinggi);
+    const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    if (body.elevasi !== undefined && !isNaN(parseFloat(body.elevasi))) {
+      // Konversi otomatis dari cm ke meter
+      tinggiMeter = Number((parseFloat(body.elevasi) / 100.0).toFixed(4));
+    } else if (body.tinggi !== undefined && !isNaN(parseFloat(body.tinggi))) {
+      tinggiMeter = parseFloat(body.tinggi);
     }
-    if (sumber) sumberData = sumber;
+    if (body.sumber) sumberData = body.sumber;
   } else {
     const { tinggi, sumber } = req.query;
     if (tinggi && !isNaN(parseFloat(tinggi))) {
@@ -40,5 +41,5 @@ export default async function handler(req, res) {
     return res.status(500).send(`Gagal simpan (${response.status}): ${errText}`);
   }
 
-  return res.status(200).send(`OK: Elevasi ${tinggiMeter} m berhasil masuk!`);
+  return res.status(200).send(`OK: Elevasi ${tinggiMeter} m berhasil masuk ke dashboard!`);
 }
