@@ -1,12 +1,26 @@
 export default async function handler(req, res) {
-  const { tinggi, sumber } = req.query;
+  let tinggiMeter = null;
+  let sumberData = "kalimas_sim800l";
 
-  if (!tinggi || isNaN(parseFloat(tinggi))) {
-    return res.status(400).send("Error: Masukkan parameter ?tinggi=1.85");
+  if (req.method === "POST" && req.body) {
+    const { elevasi, tinggi, sumber } = req.body;
+    if (elevasi !== undefined && !isNaN(parseFloat(elevasi))) {
+      tinggiMeter = Number((parseFloat(elevasi) / 100.0).toFixed(4));
+    } else if (tinggi !== undefined && !isNaN(parseFloat(tinggi))) {
+      tinggiMeter = parseFloat(tinggi);
+    }
+    if (sumber) sumberData = sumber;
+  } else {
+    const { tinggi, sumber } = req.query;
+    if (tinggi && !isNaN(parseFloat(tinggi))) {
+      tinggiMeter = parseFloat(tinggi);
+    }
+    if (sumber) sumberData = sumber;
   }
 
-  const tinggiAir = parseFloat(tinggi);
-  const sumberData = sumber || "kalimas_syahbandar";
+  if (tinggiMeter === null) {
+    return res.status(400).send("Error: Data elevasi/tinggi tidak valid");
+  }
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL;
   const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
@@ -18,10 +32,7 @@ export default async function handler(req, res) {
       "apikey": supabaseKey,
       "Prefer": "return=minimal"
     },
-    body: JSON.stringify({
-      tinggi_air: tinggiAir,
-      sumber: sumberData
-    })
+    body: JSON.stringify({ tinggi_air: tinggiMeter, sumber: sumberData })
   });
 
   if (!response.ok) {
@@ -29,5 +40,5 @@ export default async function handler(req, res) {
     return res.status(500).send(`Gagal simpan (${response.status}): ${errText}`);
   }
 
-  return res.status(200).send(`OK: Tinggi air ${tinggiAir} m berhasil masuk ke dashboard!`);
+  return res.status(200).send(`OK: Elevasi ${tinggiMeter} m berhasil masuk!`);
 }
